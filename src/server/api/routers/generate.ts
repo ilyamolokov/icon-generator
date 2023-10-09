@@ -7,8 +7,8 @@ export const generateRouter = createTRPCRouter({
         z.object({
             prompt: z.string()
         })
-    ).mutation(({ctx, input})=>{
-        console.log('we are here', input)
+    ).mutation(({ ctx, input }) => {
+        console.log('we are here', input.prompt)
         return {
             message: 'success'
         }
