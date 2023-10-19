@@ -6,11 +6,14 @@ import { Button } from "~/components/Button";
 import { FormGroup } from "~/components/FormGroup";
 import { Input } from "~/components/Input";
 import { api } from "~/utils/api";
+import Image from 'next/image'
 
 const GeneratePage: NextPage = () => {
-    const [form, setForm] = useState({
+    const [ form, setForm ] = useState({
         prompt: ''
     })
+
+    const [ imageUrl, setImageUrl ] = useState('')
 
     const session = useSession()
 
@@ -18,11 +21,13 @@ const GeneratePage: NextPage = () => {
 
     const generateIcon = api.generate.generateIcon.useMutation({
         onSuccess(data) {
-            console.log('mutation finished', data)
+            console.log('mutation finished', data.imageUrl)
+            if(!data.imageUrl) return;
+            setImageUrl(data.imageUrl)
         }
     })
 
-    const updateForm = (key: string) => {
+    const handleFormUpdate = (key: string) => {
         return function(e: React.ChangeEvent<HTMLInputElement>) {
             setForm((prev)=>
                 ({ 
@@ -34,11 +39,10 @@ const GeneratePage: NextPage = () => {
     }
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        generateIcon.mutate({
-            prompt: form.prompt
-        })
+        generateIcon.mutate({ prompt: form.prompt })
+        setForm({ prompt: ''})
     }
-    console.log(session)
+
     return (
         <>
             <Head>
@@ -54,10 +58,20 @@ const GeneratePage: NextPage = () => {
                 <form className="flex flex-col gap-4" onSubmit={handleFormSubmit}>
                     <FormGroup>
                         <label>Prompt</label>
-                        <Input value={form.prompt} onChange={updateForm('prompt')}></Input>
+                        <Input value={form.prompt} onChange={handleFormUpdate('prompt')}></Input>
                     </FormGroup>
                     <Button>Submit</Button>
                 </form>
+                {imageUrl 
+                    ? <img 
+                        src={`data:image/png;base64,${imageUrl}`} 
+                        width="200" 
+                        height="200" 
+                        alt="image" 
+                    />
+                    : null
+                }
+                {/* data:image/png;base64, */}
             </main>
         </>
     );
